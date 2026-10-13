@@ -4,7 +4,7 @@
         xmlns:views="clr-namespace:MiniChat.App.Views"
         Title="MiniChat LAN" Width="380" Height="540" MinWidth="320" MinHeight="40"
         WindowStartupLocation="Manual" WindowStyle="None" ResizeMode="CanResize"
-        Background="{StaticResource Bg}" FontFamily="{StaticResource UiFont}"
+        Background="{DynamicResource Bg}" FontFamily="{StaticResource UiFont}"
         UseLayoutRounding="True" TextOptions.TextFormattingMode="Display"
         Icon="Assets/minichat.ico">
     <WindowChrome.WindowChrome>
@@ -16,7 +16,7 @@
         <KeyBinding Key="D3" Modifiers="Ctrl" Command="{Binding ShowSettingsCommand}"/>
     </Window.InputBindings>
 
-    <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="1">
+    <Border BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="34"/>
@@ -26,7 +26,7 @@
             </Grid.RowDefinitions>
 
             <!-- Encabezado: zona de arrastre -->
-            <Grid Grid.Row="0" Background="{StaticResource Surface}">
+            <Grid Grid.Row="0" Background="{DynamicResource Surface}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
@@ -44,7 +44,7 @@
                 </StackPanel>
                 <Border Grid.Column="2" Background="{StaticResource Accent}" CornerRadius="8" Padding="6,0" Margin="0,0,4,0" VerticalAlignment="Center"
                         Visibility="{Binding HasUnread, Converter={StaticResource BoolToVis}}" ToolTip="Mensajes sin leer">
-                    <TextBlock Text="{Binding UnreadBadge}" Foreground="#0E1513" FontSize="11" FontWeight="Bold"/>
+                    <TextBlock Text="{Binding UnreadBadge}" Foreground="{StaticResource OnAccent}" FontSize="11" FontWeight="Bold"/>
                 </Border>
                 <Button Grid.Column="3" Style="{StaticResource IconButton}" WindowChrome.IsHitTestVisibleInChrome="True"
                         Command="{Binding ShowSettingsCommand}" Content="&#xE896;" Foreground="{StaticResource AccentHi}"
@@ -68,7 +68,7 @@
                 <RadioButton Style="{StaticResource NavTab}" IsChecked="{Binding IsPeople}" AutomationProperties.Name="Personas">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="Personas" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}"/>
-                        <Border Background="{StaticResource Warn}" CornerRadius="7" Padding="5,0" Margin="6,0,0,0"
+                        <Border Background="#F59E0B" CornerRadius="7" Padding="5,0" Margin="6,0,0,0"
                                 Visibility="{Binding HasIncomingRequests, Converter={StaticResource BoolToVis}}" ToolTip="Solicitudes pendientes">
                             <TextBlock Text="{Binding IncomingRequests}" Foreground="#1E1F22" FontSize="10.5" FontWeight="Bold"/>
                         </Border>
@@ -83,7 +83,7 @@
             </StackPanel>
 
             <!-- Error global -->
-            <Border Grid.Row="2" Background="#3A2326" CornerRadius="6" Margin="8,4,8,0" Padding="8,6"
+            <Border Grid.Row="2" Background="{StaticResource DangerBg}" CornerRadius="6" Margin="8,4,8,0" Padding="8,6"
                     Visibility="{Binding HasGlobalError, Converter={StaticResource BoolToVis}}">
                 <DockPanel>
                     <Button DockPanel.Dock="Right" Style="{StaticResource IconButton}" Content="&#xE711;" Command="{Binding DismissErrorCommand}" ToolTip="Cerrar aviso"/>

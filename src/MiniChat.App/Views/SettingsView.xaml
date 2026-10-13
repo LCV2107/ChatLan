@@ -280,6 +280,18 @@
                 </StackPanel>
             </Border>
 
+            <TextBlock Text="APARIENCIA" Style="{StaticResource SectionTitle}"/>
+            <Border Style="{StaticResource Card}">
+                <StackPanel>
+                    <TextBlock Text="Tema" FontWeight="SemiBold" Margin="0,0,0,2"/>
+                    <RadioButton GroupName="Theme" IsChecked="{Binding ThemeSystem}" Content="Seguir a Windows"/>
+                    <RadioButton GroupName="Theme" IsChecked="{Binding ThemeLight}" Content="Claro"/>
+                    <RadioButton GroupName="Theme" IsChecked="{Binding ThemeDark}" Content="Oscuro"/>
+                    <TextBlock Style="{StaticResource Dim}" TextWrapping="Wrap" Margin="0,4,0,0"
+                               Text="El cambio se aplica al instante (la barra de título termina de ajustarse al reabrir MiniChat). «Seguir a Windows» usa el modo claro u oscuro del sistema."/>
+                </StackPanel>
+            </Border>
+
             <TextBlock Text="ESCRITORIO" Style="{StaticResource SectionTitle}"/>
             <Border Style="{StaticResource Card}">
                 <StackPanel>

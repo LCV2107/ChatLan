@@ -68,7 +68,7 @@
                         </WrapPanel>
                     </StackPanel>
                 </Border>
-                <Border Background="#3A3023" CornerRadius="6" Padding="8,5" Margin="0,0,0,4" Visibility="{Binding HasUndelivered, Converter={StaticResource BoolToVis}}">
+                <Border Background="{StaticResource WarnBg}" CornerRadius="6" Padding="8,5" Margin="0,0,0,4" Visibility="{Binding HasUndelivered, Converter={StaticResource BoolToVis}}">
                     <DockPanel>
                         <Button DockPanel.Dock="Right" Content="Reintentar" Command="{Binding RetryCommand}"
                                 ToolTip="Reenvía en orden los mensajes no entregados. Si alguno ya había llegado, no se duplica."/>

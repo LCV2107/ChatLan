@@ -2,7 +2,9 @@ using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Windows;
 using System.Windows.Threading;
+using Microsoft.Win32;
 using MiniChat.App.Desktop;
+using MiniChat.App.Infrastructure;
 using MiniChat.App.ViewModels;
 using MiniChat.Core.Config;
 using MiniChat.Core.Diagnostics;
@@ -94,6 +96,10 @@ public partial class App : Application
             ExitNow(3);
             return;
         }
+
+        // Tema claro/oscuro antes de crear la ventana, para que arranque ya con la paleta correcta.
+        ThemeManager.Apply(ThemeManager.Parse(_engine.GetSetting(SettingsViewModel.KeyTheme)));
+        SystemEvents.UserPreferenceChanged += OnUserPreferenceChanged;
 
         var mode = Enum.TryParse<DesktopMode>(Arg("--desktop-mode"), true, out var forced) ? forced
             : Enum.TryParse<DesktopMode>(_engine.GetSetting(SettingsViewModel.KeyDesktopMode), out var saved) ? saved
@@ -239,6 +245,7 @@ public partial class App : Application
 
     private void ExitNow(int code)
     {
+        SystemEvents.UserPreferenceChanged -= OnUserPreferenceChanged;
         _single?.Dispose();
         _log?.Dispose();
         Shutdown(code);
@@ -248,6 +255,12 @@ public partial class App : Application
     {
         if (_vm is not null) _vm.ReportUnexpected(ex);
         else _log?.Error("app", "Error inesperado", ex);
+    }
+
+    private void OnUserPreferenceChanged(object sender, UserPreferenceChangedEventArgs e)
+    {
+        // Windows cambió de tema claro/oscuro: si seguimos el sistema, reaplicamos la paleta.
+        if (e.Category == UserPreferenceCategory.General) Dispatcher.BeginInvoke(ThemeManager.ReapplyIfSystem);
     }
 
     private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)

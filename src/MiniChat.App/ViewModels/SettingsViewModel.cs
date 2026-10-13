@@ -122,6 +122,7 @@ public sealed class SettingsViewModel : ObservableObject
     public const string KeySound = "ui.sound";
     public const string KeyPreview = "ui.preview";
     public const string KeyDesktopMode = "ui.desktopMode";
+    public const string KeyTheme = "ui.theme";
 
     private readonly ChatEngine _engine;
     private readonly MainViewModel _main;
@@ -332,6 +333,22 @@ public sealed class SettingsViewModel : ObservableObject
     {
         get => _engine.GetSetting(KeyHideFromCapture) == "1";
         set { _engine.SetSetting(KeyHideFromCapture, value ? "1" : "0"); OnPropertyChanged(); _main.SetCaptureProtection(value); }
+    }
+
+    // ======================= Apariencia (tema claro/oscuro) =======================
+
+    private AppTheme Theme => ThemeManager.Parse(_engine.GetSetting(KeyTheme));
+    public bool ThemeSystem { get => Theme == AppTheme.System; set { if (value) SetTheme(AppTheme.System); } }
+    public bool ThemeLight { get => Theme == AppTheme.Light; set { if (value) SetTheme(AppTheme.Light); } }
+    public bool ThemeDark { get => Theme == AppTheme.Dark; set { if (value) SetTheme(AppTheme.Dark); } }
+
+    private void SetTheme(AppTheme t)
+    {
+        _engine.SetSetting(KeyTheme, ThemeManager.Id(t));
+        ThemeManager.Apply(t);
+        OnPropertyChanged(nameof(ThemeSystem));
+        OnPropertyChanged(nameof(ThemeLight));
+        OnPropertyChanged(nameof(ThemeDark));
     }
 
     private string? _pinMessage;
