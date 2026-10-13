@@ -38,17 +38,17 @@ public sealed record UpdateCheckResult(UpdateStatus Status, UpdateInfo? Update, 
 public static class UpdateConfig
 {
     /// <summary>Repositorio público «dueño/repo». Cambiar por el real (p. ej. «luiscv/minichat-lan»).</summary>
-    public const string Repository = "OWNER/REPO";
+    public const string Repository = "LCV2107/ChatLan";
 
     /// <summary>Rama donde viven los manifiestos de la carpeta <c>updates/</c>.</summary>
-    public const string Branch = "main";
+    public const string Branch = "master";
 
     /// <summary>
     /// Clave pública ECDSA P-256 (SubjectPublicKeyInfo, Base64) que firma los manifiestos.
     /// Se obtiene una vez con:  pwsh tools\firmar-release.ps1 -Init
     /// Sin esta clave, las actualizaciones quedan desactivadas (no se descarga ni ejecuta nada).
     /// </summary>
-    public const string TrustedPublicKeyBase64 = "";
+    public const string TrustedPublicKeyBase64 = "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEeLLTjz3Qe74oN/t/QxiSUPjJ+tgiOSZw/VMkvaR7347nFmc+7HFnUB8WP8QlHYz5Nvy/9WTVmjaLvvvvdfC2JQ==";
 
     public static string ManifestBaseUrl => $"https://raw.githubusercontent.com/{Repository}/{Branch}/updates/";
 

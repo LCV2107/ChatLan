@@ -47,7 +47,29 @@ Código: [`src/MiniChat.Core/Update`](../src/MiniChat.Core/Update) (servicio, ti
 > la pública en el código y publicar una versión nueva por los medios habituales (los clientes antiguos no
 > aceptarán manifiestos firmados con la clave nueva hasta actualizarse una vez a mano).
 
-## Publicar una versión (planificado, trazado y anunciado)
+## Publicar una versión con un comando (recomendado)
+
+Una vez hecho el Paso de activación, cada release es un solo comando. Tú solo decides la **versión** y las
+**notas**; el resto (versión en el código, MSI, Release en GitHub, firma y push) lo hace el script. La clave
+privada nunca sale de tu equipo.
+
+```powershell
+pwsh tools\publicar-release.ps1 -Version 1.0.0 -Notes "Primera versión."
+pwsh tools\publicar-release.ps1 -Version 1.0.1 -Channel stable -Notes "Correcciones menores."
+pwsh tools\publicar-release.ps1 -Version 1.1.0-beta.1 -Channel experimental -Notes "Prueba de otras subredes."
+pwsh tools\publicar-release.ps1 -Version 1.0.1 -DryRun     # muestra el plan sin tocar nada
+```
+
+Hace, en orden: fija `<Version>` en `Directory.Build.props` → compila el MSI → crea la Release en GitHub con el
+MSI adjunto (pre-release si el canal es experimental) → firma el manifiesto → commit y push de
+`Directory.Build.props` y `updates\<canal>.json(.sig)`. El repositorio lo deduce del remoto `git` (o `-Repo`).
+
+Requiere **PowerShell 7** y la **CLI de GitHub** (`gh`) autenticada (`gh auth login`). Con `-SinGitHub` hace
+todo menos crear la Release y el push, y te indica esos dos pasos para hacerlos a mano.
+
+Los pasos manuales equivalentes (por si prefieres control total o algo falla) son los de abajo.
+
+## Publicar una versión paso a paso (equivalente manual)
 
 1. **Sube la versión** en `Directory.Build.props` (`<Version>`): `1.0.1` para Estable, `1.1.0-beta.1` para
    Experimental. Haz commit.

@@ -39,6 +39,7 @@ tools/
   prueba-sin-internet.ps1  Corta Internet SOLO a MiniChat para demostrar que funciona con la red local.
   firewall-subredes.ps1    (Administrador) Permite otras subredes de la oficina en el firewall y como directiva del equipo.
   firmar-release.ps1       (PowerShell 7) Firma una release para el actualizador: genera updates\<canal>.json(.sig).
+  publicar-release.ps1     (PowerShell 7 + gh) Publica una versión con un comando: versión, MSI, Release, firma y push.
 updates/                Manifiestos firmados que el actualizador descarga de GitHub (stable/experimental).
 installer/MiniChat.Installer/  Proyecto WiX 6 del instalador MSI (fuera de la solución a propósito).
 licenses/               Licencias y avisos de terceros (se distribuyen con la aplicación).
