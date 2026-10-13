@@ -1,0 +1,15 @@
+<Application x:Class="MiniChat.App.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:inf="clr-namespace:MiniChat.App.Infrastructure"
+             ShutdownMode="OnExplicitShutdown">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Themes/Dark.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            <inf:InverseBoolToVisibilityConverter x:Key="NotVis"/>
+            <inf:InverseBoolConverter x:Key="Not"/>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

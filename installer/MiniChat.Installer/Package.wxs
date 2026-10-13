@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  MiniChat LAN — paquete MSI (WiX Toolset 6).
+  - Instalación por equipo en "Program Files\MiniChat LAN" (requiere administrador solo para instalar).
+  - La aplicación se ejecuta como usuario estándar; sus datos van a %LocalAppData%\MiniChatLAN\ de cada usuario
+    y NO se borran al desinstalar ni al actualizar.
+  - Reglas de firewall limitadas: solo MiniChat.exe, solo entrada TCP 47821 y UDP 47820, solo perfiles
+    Dominio y Privado, solo desde la subred local. No se desactiva el firewall ni se abre la red Pública.
+  - Sin servicios, sin tareas programadas, sin actualizaciones automáticas, sin telemetría.
+-->
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:fw="http://wixtoolset.org/schemas/v4/wxs/firewall">
+
+  <Package Name="MiniChat LAN"
+           Manufacturer="MiniChat LAN"
+           Version="$(var.ProductVersion)"
+           UpgradeCode="{6E3B2D41-8C7A-4F0E-9B52-3D1A7C9E4F10}"
+           Language="3082"
+           Codepage="1252"
+           Scope="perMachine"
+           Compressed="yes">
+
+    <!-- Una sola instalación en el equipo: el UpgradeCode fijo + MajorUpgrade reemplazan cualquier versión
+         anterior. AllowSameVersionUpgrades también reemplaza una reinstalación de la MISMA versión (si no,
+         Windows dejaba dos MiniChat instalados). Requiere suprimir ICE61 (ver el .wixproj). -->
+    <MajorUpgrade AllowSameVersionUpgrades="yes"
+                  DowngradeErrorMessage="Ya hay instalada una versión más reciente de MiniChat LAN." />
+    <MediaTemplate EmbedCab="yes" />
+
+    <Icon Id="MiniChatIcon" SourceFile="$(var.AssetsDir)minichat.ico" />
+    <Property Id="ARPPRODUCTICON" Value="MiniChatIcon" />
+    <Property Id="ARPNOMODIFY" Value="1" />
+
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="INSTALLFOLDER" Name="MiniChat LAN">
+        <!-- Todos los archivos de la publicación autocontenida (aplicación + runtime de .NET + dependencias). -->
+        <Files Include="$(var.PublishDir)**" />
+      </Directory>
+    </StandardDirectory>
+
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Component Id="StartMenuShortcut" Guid="{B4C2E7A9-1D35-4F86-A0C1-5E9D2B7F3A64}">
+        <Shortcut Id="MiniChatShortcut"
+                  Name="MiniChat LAN"
+                  Description="Chat entre compañeros de la red local"
+                  Target="[INSTALLFOLDER]MiniChat.exe" />
+        <!-- Windows Installer (ICE38/ICE43/ICE57) exige que un acceso directo no anunciado use una clave de HKCU como KeyPath. -->
+        <RegistryValue Root="HKCU" Key="Software\MiniChatLAN" Name="StartMenuShortcut" Type="integer" Value="1" KeyPath="yes" />
+      </Component>
+    </StandardDirectory>
+
+    <!-- Reglas de entrada limitadas (programa + puerto + perfil + subred local). -->
+    <Component Id="FirewallRules" Directory="INSTALLFOLDER" Guid="{0F8E6A2B-7C43-4D19-B6E5-92A1C3D7E845}">
+      <fw:FirewallException Id="FwTcpPrivate" Name="MiniChat LAN (TCP, red privada)" Description="Conversaciones cifradas de MiniChat LAN en la red local."
+                            Program="[INSTALLFOLDER]MiniChat.exe" Protocol="tcp" Port="47821" Scope="localSubnet" Profile="private" />
+      <fw:FirewallException Id="FwTcpDomain" Name="MiniChat LAN (TCP, red de dominio)" Description="Conversaciones cifradas de MiniChat LAN en la red local."
+                            Program="[INSTALLFOLDER]MiniChat.exe" Protocol="tcp" Port="47821" Scope="localSubnet" Profile="domain" />
+      <fw:FirewallException Id="FwUdpPrivate" Name="MiniChat LAN (descubrimiento, red privada)" Description="Anuncios de presencia de MiniChat LAN (multicast local)."
+                            Program="[INSTALLFOLDER]MiniChat.exe" Protocol="udp" Port="47820" Scope="localSubnet" Profile="private" />
+      <fw:FirewallException Id="FwUdpDomain" Name="MiniChat LAN (descubrimiento, red de dominio)" Description="Anuncios de presencia de MiniChat LAN (multicast local)."
+                            Program="[INSTALLFOLDER]MiniChat.exe" Protocol="udp" Port="47820" Scope="localSubnet" Profile="domain" />
+      <RegistryValue Root="HKLM" Key="Software\MiniChatLAN" Name="FirewallRules" Type="integer" Value="1" KeyPath="yes" />
+    </Component>
+
+    <!-- Sin elemento Feature: WiX crea una característica predeterminada con todos los componentes. -->
+  </Package>
+</Wix>

@@ -1,0 +1,33 @@
+<UserControl x:Class="MiniChat.App.Views.LockView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Focusable="False">
+        <StackPanel Margin="8,28,8,8">
+            <TextBlock Text="&#xE72E;" FontFamily="{StaticResource IconFont}" FontSize="30" HorizontalAlignment="Center" Foreground="{StaticResource TextDim}"/>
+            <TextBlock Text="MiniChat está bloqueado" FontSize="17" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,10,0,0"/>
+            <TextBlock Style="{StaticResource Dim}" TextWrapping="Wrap" TextAlignment="Center" Margin="0,6,0,0" FontSize="12.5"
+                       Text="Sigue recibiendo mensajes, pero están cifrados. Introduce tu PIN para verlos."/>
+            <PasswordBox x:Name="PinBox" Margin="0,18,0,0" AutomationProperties.Name="PIN" MaxLength="64" KeyDown="OnPinKeyDown"/>
+            <TextBlock Text="{Binding LockError}" Style="{StaticResource ErrorText}" Margin="0,6,0,0"
+                       Visibility="{Binding HasLockError, Converter={StaticResource BoolToVis}}"/>
+            <Button Content="Desbloquear" Style="{StaticResource PrimaryButton}" HorizontalAlignment="Stretch" Margin="0,10,0,0"
+                    Click="OnUnlock" IsEnabled="{Binding Busy, Converter={StaticResource Not}}"/>
+
+            <Expander Margin="0,24,0,0" Foreground="{StaticResource Text}">
+                <Expander.Header>
+                    <TextBlock Text="¿Olvidaste el PIN?" Style="{StaticResource Dim}" FontSize="12.5"/>
+                </Expander.Header>
+                <StackPanel Margin="0,6,0,0">
+                    <TextBlock Foreground="{StaticResource Warn}" FontSize="12" TextWrapping="Wrap"
+                               Text="Sin el PIN nadie puede descifrar el historial, ni siquiera tú. Puedes crear un PIN nuevo, pero se borrarán de este equipo todas las conversaciones y los stickers. Tus contactos y autorizaciones se conservan; la copia de tus compañeros no se toca."/>
+                    <TextBlock Text="PIN nuevo" Margin="0,8,0,4"/>
+                    <PasswordBox x:Name="NewPinBox" AutomationProperties.Name="PIN nuevo" MaxLength="64"/>
+                    <TextBlock Text="Repite el PIN nuevo" Margin="0,6,0,4"/>
+                    <PasswordBox x:Name="NewPinConfirmBox" AutomationProperties.Name="Repetir PIN nuevo" MaxLength="64"/>
+                    <Button Content="Borrar historial y crear PIN nuevo" Style="{StaticResource DangerButton}" HorizontalAlignment="Left" Margin="0,8,0,0"
+                            Click="OnReset" IsEnabled="{Binding Busy, Converter={StaticResource Not}}"/>
+                </StackPanel>
+            </Expander>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

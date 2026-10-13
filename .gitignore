@@ -1,0 +1,10 @@
+bin/
+obj/
+artifacts/
+*.user
+.vs/
+TestResults/
+
+# Claves privadas de firma de releases (NUNCA subir)
+tools/keys/
+*.key

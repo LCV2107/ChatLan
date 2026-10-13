@@ -1,0 +1,40 @@
+<Project Sdk="WixToolset.Sdk/6.0.2">
+  <!--
+    Instalador MSI de MiniChat LAN (WiX Toolset 6, licencia OSMF EULA: ver docs/DEPENDENCIAS.md).
+    Al compilar este proyecto:
+      1) se publica MiniChat.App autocontenido para win-x64 (no requiere instalar .NET en el equipo destino)
+         en artifacts\publish\MiniChat\
+      2) se genera el MSI con todos esos archivos.
+    Comando (desde la raíz del repositorio):
+      dotnet build installer\MiniChat.Installer\MiniChat.Installer.wixproj -c Release
+  -->
+  <PropertyGroup>
+    <OutputName>MiniChatLAN-$(Version)-x64</OutputName>
+    <InstallerPlatform>x64</InstallerPlatform>
+    <!-- ICE60: e_sqlite3.dll (SQLite nativo) tiene versión pero no idioma. Es inocuo: el versionado de archivos
+         de Windows Installer funciona igual. No se puede declarar idioma en archivos recogidos con <Files>. -->
+    <!-- ICE61: lo exige AllowSameVersionUpgrades="yes" (permite que la misma versión reemplace a la anterior,
+         para que nunca queden dos instalaciones). Es el comportamiento buscado, no un error. -->
+    <SuppressIces>ICE60;ICE61</SuppressIces>
+    <MiniChatPublishDir>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\..\artifacts\publish\MiniChat\'))</MiniChatPublishDir>
+    <DefineConstants>PublishDir=$(MiniChatPublishDir);ProductVersion=$(Version);AssetsDir=$(MSBuildThisFileDirectory)..\..\src\MiniChat.App\Assets\</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="WixToolset.Firewall.wixext" Version="6.0.2" />
+  </ItemGroup>
+
+  <!-- Publicación limpia de la aplicación antes de compilar el MSI. -->
+  <PropertyGroup>
+    <MiniChatPublishProperties>Configuration=Release;RuntimeIdentifier=win-x64;SelfContained=true;PublishReadyToRun=true;PublishDir=$(MiniChatPublishDir);CopyOutputSymbolsToPublishDirectory=false</MiniChatPublishProperties>
+  </PropertyGroup>
+  <Target Name="PublishMiniChatApp" BeforeTargets="BeforeBuild">
+    <RemoveDir Directories="$(MiniChatPublishDir)" />
+    <!-- Restauración con los mismos parámetros (paquetes de runtime autocontenido y ReadyToRun). -->
+    <MSBuild Projects="..\..\src\MiniChat.App\MiniChat.App.csproj" Targets="Restore"
+             Properties="$(MiniChatPublishProperties);MSBuildRestoreSessionId=$([System.Guid]::NewGuid())" />
+    <MSBuild Projects="..\..\src\MiniChat.App\MiniChat.App.csproj" Targets="Publish"
+             Properties="$(MiniChatPublishProperties)" />
+    <Error Condition="!Exists('$(MiniChatPublishDir)MiniChat.exe')" Text="La publicación de MiniChat no generó MiniChat.exe en $(MiniChatPublishDir)." />
+  </Target>
+</Project>

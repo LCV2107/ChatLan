@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <AssemblyName>MiniChat</AssemblyName>
+    <NoWarn>$(NoWarn);WFO0003</NoWarn>
+    <RootNamespace>MiniChat.App</RootNamespace>
+    <!-- Widget pequeño: GC de estación de trabajo sin hilo de recolección en segundo plano. -->
+    <ConcurrentGarbageCollection>false</ConcurrentGarbageCollection>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MiniChat.Core\MiniChat.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Iconos: como recurso para XAML y como archivo para el icono de bandeja. -->
+    <Resource Include="Assets\*.ico" />
+    <Content Include="Assets\*.ico" CopyToOutputDirectory="PreserveNewest" />
+    <!-- Licencias y avisos de terceros: se distribuyen junto al ejecutable. -->
+    <Content Include="..\..\licenses\**" LinkBase="Licenses" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <ApplicationIcon>Assets\minichat.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- WinForms solo se usa para el icono de bandeja; evitamos ambigüedades globales con WPF. -->
+    <Using Remove="System.Windows.Forms" />
+    <Using Remove="System.Drawing" />
+    <Using Include="System.IO" />
+  </ItemGroup>
+
+</Project>

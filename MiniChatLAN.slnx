@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/MiniChat.App/MiniChat.App.csproj" />
+    <Project Path="src/MiniChat.Core/MiniChat.Core.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/MiniChat.Tests/MiniChat.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tools/">
+    <Project Path="tools/MiniChat.DesktopProbe/MiniChat.DesktopProbe.csproj" />
+    <Project Path="tools/MiniChat.Peer/MiniChat.Peer.csproj" />
+  </Folder>
+</Solution>

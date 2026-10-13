@@ -1,0 +1,388 @@
+<UserControl x:Class="MiniChat.App.Views.SettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <UserControl.Resources>
+        <DataTemplate x:Key="FindingTemplate">
+            <Border Background="{StaticResource SurfaceHi}" CornerRadius="5" Padding="8,6" Margin="0,0,0,5">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Left" Text="{Binding Glyph}" FontFamily="{StaticResource IconFont}" Foreground="{Binding Color}"
+                               FontSize="14" Margin="0,1,8,0" VerticalAlignment="Top"/>
+                    <StackPanel>
+                        <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextWrapping="Wrap"/>
+                        <TextBlock Text="{Binding Detail}" Style="{StaticResource Dim}" TextWrapping="Wrap" Margin="0,2,0,0"/>
+                        <TextBlock TextWrapping="Wrap" FontSize="12" Foreground="{StaticResource AccentHi}" Margin="0,3,0,0"
+                                   Visibility="{Binding HasFix, Converter={StaticResource BoolToVis}}">
+                            <Run Text="Cómo resolverlo: " FontWeight="SemiBold"/><Run Text="{Binding Fix, Mode=OneWay}"/>
+                        </TextBlock>
+                    </StackPanel>
+                </DockPanel>
+            </Border>
+        </DataTemplate>
+    </UserControl.Resources>
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Focusable="False">
+        <StackPanel Margin="0,0,6,10">
+
+            <TextBlock Text="PERFIL" Style="{StaticResource SectionTitle}"/>
+            <Border Style="{StaticResource Card}">
+                <StackPanel>
+                    <TextBlock Text="Nombre visible" Style="{StaticResource Dim}"/>
+                    <DockPanel Margin="0,3,0,0">
+                        <Button DockPanel.Dock="Right" Content="Guardar" Margin="6,0,0,0" Command="{Binding SaveNameCommand}"/>
+                        <TextBox Text="{Binding DisplayName, UpdateSourceTrigger=PropertyChanged}" MaxLength="64" AutomationProperties.Name="Nombre visible"/>
+                    </DockPanel>
+                    <TextBlock Text="{Binding NameMessage}" FontSize="12" TextWrapping="Wrap" Margin="0,4,0,0"
+                               Visibility="{Binding HasNameMessage, Converter={StaticResource BoolToVis}}">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Foreground" Value="{StaticResource AccentHi}"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding NameError}" Value="True">
+                                        <Setter Property="Foreground" Value="{StaticResource Danger}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                    <TextBlock Text="Nombre de PC" Style="{StaticResource Dim}" Margin="0,10,0,0"/>
+                    <TextBox Style="{StaticResource SelectableText}" Text="{Binding MachineName, Mode=OneWay}"/>
+                    <TextBlock Text="IP local" Style="{StaticResource Dim}" Margin="0,8,0,0"/>
+                    <TextBox Style="{StaticResource SelectableText}" Text="{Binding LocalIps, Mode=OneWay}"/>
+                    <TextBlock Text="Código de identidad (huella de tu clave)" Style="{StaticResource Dim}" Margin="0,8,0,0"/>
+                    <TextBox Style="{StaticResource SelectableText}" Text="{Binding IdentityCode, Mode=OneWay}" FontFamily="Consolas" FontSize="14"
+                             ToolTip="{Binding Fingerprint}"/>
+                    <TextBlock Style="{StaticResource Dim}" TextWrapping="Wrap" Margin="0,4,0,0"
+                               Text="Identifica esta instalación. No depende del nombre, la PC ni la IP. Si reinstalas y pierdes la clave, tus contactos deberán emparejarse de nuevo."/>
+                    <TextBlock Foreground="{StaticResource Warn}" FontSize="12" TextWrapping="Wrap" Margin="0,6,0,0"
+                               Visibility="{Binding IdentityRegenerated, Converter={StaticResource BoolToVis}}"
+                               Text="Aviso: no se encontró tu clave anterior y se creó una identidad nueva. Tus contactos te verán como un equipo distinto y deben aceptar una nueva solicitud."/>
+                </StackPanel>
+            </Border>
+
+            <TextBlock Text="REDES" Style="{StaticResource SectionTitle}"/>
+            <Border Style="{StaticResource Card}">
+                <StackPanel>
+                    <TextBlock Style="{StaticResource Dim}" TextWrapping="Wrap"
+                               Text="MiniChat solo se comunica dentro de las redes marcadas «En uso». Por defecto usa redes con perfil Privado o Dominio de Windows; las redes Públicas, VPN o virtuales solo si las autorizas aquí."/>
+                    <ItemsControl ItemsSource="{Binding Networks}" Margin="0,6,0,0">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Background="{StaticResource SurfaceHi}" CornerRadius="5" Padding="8,6" Margin="0,0,0,5">
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                                        <TextBlock Text="{Binding Detail}" Style="{StaticResource Dim}" TextWrapping="Wrap"/>
+                                        <TextBlock Text="{Binding StateText}" FontSize="12" TextWrapping="Wrap" Margin="0,2,0,0">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Foreground" Value="{StaticResource Warn}"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Allowed}" Value="True">
+                                                            <Setter Property="Foreground" Value="{StaticResource Online}"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                        <WrapPanel Margin="0,5,0,0">
+                                            <Button Content="Autorizar esta red" Margin="0,0,6,0" Command="{Binding TrustCommand}" Visibility="{Binding CanTrust, Converter={StaticResource BoolToVis}}"
+                                                    ToolTip="Hazlo solo si es tu red de trabajo de confianza"/>
+                                            <Button Content="No usar esta red" Margin="0,0,6,0" Command="{Binding DenyCommand}" Visibility="{Binding CanDeny, Converter={StaticResource BoolToVis}}"/>
+                                            <Button Content="Volver al criterio automático" Style="{StaticResource LinkButton}" Command="{Binding DefaultCommand}"
+                                                    Visibility="{Binding IsUserChoice, Converter={StaticResource BoolToVis}}"/>
+                                        </WrapPanel>
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <TextBlock Text="{Binding Ports}" Style="{StaticResource Dim}" TextWrapping="Wrap"/>
+                    <TextBlock Text="{Binding ServerError}" Style="{StaticResource ErrorText}" Margin="0,4,0,0"
+                               Visibility="{Binding HasServerError, Converter={StaticResource BoolToVis}}"/>
+                    <WrapPanel Margin="0,6,0,0">
+                        <Button Content="Diagnosticar red" Style="{StaticResource PrimaryButton}" Margin="0,0,6,6" Command="{Binding DiagnoseCommand}"
+                                ToolTip="Busca los problemas más comunes (red Pública, IP fija sin puerta de enlace, IP duplicada, firewall, máscaras distintas…)"/>
+                        <Button Content="Volver a detectar redes" Margin="0,0,6,6" Command="{Binding RefreshNetworksCommand}"/>
+                    </WrapPanel>
+                    <TextBlock Text="Comprobando la red…" Style="{StaticResource Dim}" Visibility="{Binding Diagnosing, Converter={StaticResource BoolToVis}}"/>
+                    <ItemsControl ItemsSource="{Binding Findings}" ItemTemplate="{StaticResource FindingTemplate}"
+                                  Visibility="{Binding HasFindings, Converter={StaticResource BoolToVis}}"/>
+                </StackPanel>
+            </Border>
+
+            <TextBlock Text="OTRAS SUBREDES DE LA OFICINA" Style="{StaticResource SectionTitle}"/>
+            <Border Style="{StaticResource Card}">
+                <StackPanel>
+                    <TextBlock Style="{StaticResource Dim}" TextWrapping="Wrap"
+                               Text="Si otras áreas de la oficina están en subredes distintas (por ejemplo 10.10.161.x) unidas por el router, añádalas aquí. MiniChat buscará en ellas a quien tenga MiniChat abierto. Ellos deben añadir también su subred, y su firewall debe permitirla."/>
+
+                    <ItemsControl ItemsSource="{Binding RemoteSubnets}" Margin="0,6,0,0">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Background="{StaticResource SurfaceHi}" CornerRadius="5" Padding="8,6" Margin="0,0,0,5">
+                                    <DockPanel>
+                                        <Button DockPanel.Dock="Right" Content="Quitar" Style="{StaticResource LinkButton}" VerticalAlignment="Center"
+                                                Command="{Binding RemoveCommand}" Visibility="{Binding CanRemove, Converter={StaticResource BoolToVis}}"/>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontFamily="Consolas"/>
+                                            <TextBlock Text="{Binding Detail}" FontSize="12" TextWrapping="Wrap">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Foreground" Value="{StaticResource Warn}"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding HasRoute}" Value="True">
+                                                                <Setter Property="Foreground" Value="{StaticResource Online}"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </DockPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <TextBlock Text="Ninguna: solo se usa la red de este equipo." Style="{StaticResource Dim}" Margin="0,4,0,0"
+                               Visibility="{Binding HasRemoteSubnets, Converter={StaticResource NotVis}}"/>
+
+                    <DockPanel Margin="0,6,0,0">
+                        <Button DockPanel.Dock="Right" Content="Añadir" Margin="6,0,0,0" Command="{Binding AddSubnetCommand}"/>
+                        <TextBox Text="{Binding NewSubnet, UpdateSourceTrigger=PropertyChanged}" MaxLength="40" FontFamily="Consolas"
+                                 AutomationProperties.Name="Subred a añadir" ToolTip="Ejemplo: 10.10.161.0/24 o 10.10.161.0/255.255.255.0"/>
+                    </DockPanel>
+                    <TextBlock Text="Ejemplo: 10.10.161.0/24" Style="{StaticResource Dim}" Margin="0,2,0,0"/>
+                    <TextBlock Text="{Binding SubnetMessage}" FontSize="12" TextWrapping="Wrap" Margin="0,4,0,0"
+                               Visibility="{Binding HasSubnetMessage, Converter={StaticResource BoolToVis}}">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Foreground" Value="{StaticResource AccentHi}"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding SubnetError}" Value="True">
+                                        <Setter Property="Foreground" Value="{StaticResource Danger}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+
+                    <CheckBox IsChecked="{Binding RemoteSweepEnabled}" Content="Buscar compañeros en estas subredes" Margin="0,8,0,0"
+                              Visibility="{Binding HasRemoteSubnets, Converter={StaticResource BoolToVis}}"/>
+                    <TextBlock Text="{Binding SweepText}" Style="{StaticResource Dim}" TextWrapping="Wrap" Margin="20,0,0,0"
+                               Visibility="{Binding HasRemoteSubnets, Converter={StaticResource BoolToVis}}"/>
+                    <TextBlock Style="{StaticResource Dim}" TextWrapping="Wrap" Margin="20,2,0,0"
+                               Visibility="{Binding HasRemoteSubnets, Converter={StaticResource BoolToVis}}"
+                               Text="Envía un aviso pequeño (sin su nombre) a cada dirección de esas subredes, unos 20 por segundo; solo responden los equipos con MiniChat. El área de TI puede verlo como un barrido de red."/>
+
+                    <TextBlock Text="Explorar la oficina" FontWeight="SemiBold" Margin="0,12,0,2"/>
+                    <TextBlock Style="{StaticResource Dim}" TextWrapping="Wrap"
+                               Text="Busca qué subredes existen junto a la suya haciendo ping al router habitual de cada una (unos 500 pings, ~15 s). Solo cuando lo pulse."/>
+                    <Button Content="Explorar subredes" HorizontalAlignment="Left" Margin="0,6,0,6" Command="{Binding ScanOfficeCommand}"/>
+                    <ProgressBar Value="{Binding ScanProgress, Mode=OneWay}" Maximum="100" Height="4" BorderThickness="0" Margin="0,0,0,6"
+                                 Background="{StaticResource SurfaceHi}" Foreground="{StaticResource AccentHi}"
+                                 Visibility="{Binding Scanning, Converter={StaticResource BoolToVis}}"/>
+                    <TextBlock Text="{Binding ScanSummary}" FontSize="12" TextWrapping="Wrap" Margin="0,0,0,6"
+                               Visibility="{Binding HasScanSummary, Converter={StaticResource BoolToVis}}"/>
+                    <ItemsControl ItemsSource="{Binding Candidates}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Background="{StaticResource SurfaceHi}" CornerRadius="5" Padding="8,5" Margin="0,0,0,4">
+                                    <DockPanel>
+                                        <Button DockPanel.Dock="Right" Content="Añadir" VerticalAlignment="Center" Padding="8,2"
+                                                Command="{Binding AddCommand}" Visibility="{Binding CanAdd, Converter={StaticResource BoolToVis}}"/>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontFamily="Consolas"/>
+                                            <TextBlock Text="{Binding Detail}" Style="{StaticResource Dim}" TextWrapping="Wrap"/>
+                                        </StackPanel>
+                                    </DockPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <TextBlock Text="Probar una IP" FontWeight="SemiBold" Margin="0,12,0,2"/>
+                    <TextBlock Style="{StaticResource Dim}" TextWrapping="Wrap"
+                               Text="Con la IP de un compañero de otra área: comprueba la ruta, el ping, los routers intermedios y el puerto de MiniChat, y le dice si se puede conectar y qué falta."/>
+                    <DockPanel Margin="0,6,0,6">
+                        <Button DockPanel.Dock="Right" Content="Probar" Margin="6,0,0,0" Command="{Binding ProbeIpCommand}"/>
+                        <TextBox Text="{Binding ProbeIp, UpdateSourceTrigger=PropertyChanged}" MaxLength="15" FontFamily="Consolas"
+                                 AutomationProperties.Name="IP a probar" ToolTip="Ejemplo: 10.10.161.25"/>
+                    </DockPanel>
+                    <TextBlock Text="Comprobando (puede tardar hasta 20 s)…" Style="{StaticResource Dim}" Visibility="{Binding Probing, Converter={StaticResource BoolToVis}}"/>
+                    <ContentControl Content="{Binding ProbeVerdict}" ContentTemplate="{StaticResource FindingTemplate}" Focusable="False"
+                                    Visibility="{Binding HasProbeVerdict, Converter={StaticResource BoolToVis}}"/>
+                    <Button Content="{Binding SuggestedText}" Style="{StaticResource PrimaryButton}" HorizontalAlignment="Left" Margin="0,0,0,6"
+                            Command="{Binding AddSuggestedCommand}" Visibility="{Binding HasSuggestedSubnet, Converter={StaticResource BoolToVis}}"/>
+                    <ItemsControl ItemsSource="{Binding ProbeSteps}" ItemTemplate="{StaticResource FindingTemplate}"/>
+                </StackPanel>
+            </Border>
+
+            <TextBlock Text="PRUEBA SIN INTERNET" Style="{StaticResource SectionTitle}"/>
+            <Border Style="{StaticResource Card}">
+                <StackPanel>
+                    <TextBlock Style="{StaticResource Dim}" TextWrapping="Wrap"
+                               Text="MiniChat solo se comunica con equipos de su red local: nunca usa Internet, servidores externos ni DNS. Para demostrarlo puede cortar Internet solo a MiniChat (el resto del equipo no se ve afectado) con el script tools\prueba-sin-internet.ps1, o desconectar el cable de Internet del router, y seguir chateando."/>
+                    <Button Content="Actualizar estado" HorizontalAlignment="Left" Margin="0,8,0,6" Command="{Binding RefreshOfflineCommand}"/>
+                    <TextBlock Text="{Binding OfflineInternet}" TextWrapping="Wrap" FontSize="12.5"/>
+                    <TextBlock Text="{Binding OfflineLan}" TextWrapping="Wrap" FontSize="12.5" Margin="0,2,0,0"/>
+                    <TextBlock Text="{Binding OfflinePeers}" TextWrapping="Wrap" FontSize="12.5" Margin="0,2,0,0"/>
+                    <TextBlock Text="{Binding OfflineBlocked}" TextWrapping="Wrap" FontSize="12.5" Margin="0,2,0,0"/>
+                    <TextBlock TextWrapping="Wrap" FontSize="12.5" Margin="0,6,0,0" Foreground="{StaticResource Online}"
+                               Visibility="{Binding OfflineCutActive, Converter={StaticResource BoolToVis}}"
+                               Text="Prueba activa: el firewall impide a MiniChat llegar a cualquier dirección de Internet. Si sigue viendo compañeros y enviando mensajes, funciona solo con la red local."/>
+                    <TextBlock TextWrapping="Wrap" Style="{StaticResource Dim}" Margin="0,6,0,0"
+                               Visibility="{Binding OfflineCutActive, Converter={StaticResource NotVis}}"
+                               Text="Prueba inactiva (MiniChat tiene el acceso normal)."/>
+                </StackPanel>
+            </Border>
+
+            <TextBlock Text="SEGURIDAD" Style="{StaticResource SectionTitle}"/>
+            <Border Style="{StaticResource Card}">
+                <StackPanel>
+                    <TextBlock Text="{Binding SecuritySummary}" TextWrapping="Wrap" FontSize="12.5"/>
+                    <TextBlock Text="{Binding SecurityLimits}" Style="{StaticResource Dim}" TextWrapping="Wrap" Margin="0,6,0,0"/>
+
+                    <TextBlock Text="Bloqueo" FontWeight="SemiBold" Margin="0,12,0,2"/>
+                    <StackPanel Orientation="Horizontal">
+                        <RadioButton GroupName="LockMode" IsChecked="{Binding LockOnIdle}" Content="Bloquear tras" VerticalAlignment="Center"/>
+                        <ComboBox ItemsSource="{Binding MinuteOptions}" SelectedItem="{Binding LockMinutes}" Width="60" Margin="6,0" IsEnabled="{Binding LockOnIdle}"
+                                  AutomationProperties.Name="Minutos sin uso"/>
+                        <TextBlock Text="minutos sin uso" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <RadioButton GroupName="LockMode" IsChecked="{Binding LockNever}" Content="Mantener desbloqueado mientras MiniChat esté abierto"/>
+                    <CheckBox IsChecked="{Binding LockOnWindowsLock}" Content="Bloquear también al bloquear Windows (Win+L)"/>
+                    <TextBlock Style="{StaticResource Dim}" TextWrapping="Wrap"
+                               Text="Al cerrar y volver a abrir MiniChat siempre se pide el PIN. También puede bloquearlo en cualquier momento con el candado del encabezado."/>
+
+                    <CheckBox IsChecked="{Binding HideFromCapture}" Content="Ocultar MiniChat en capturas y grabaciones de pantalla" Margin="0,10,0,0"/>
+                    <TextBlock Style="{StaticResource Dim}" TextWrapping="Wrap" Margin="20,0,0,0"
+                               Text="La ventana aparece vacía en capturas, grabaciones y escritorio remoto. No evita fotos de la pantalla."/>
+
+                    <TextBlock Text="Cambiar PIN" FontWeight="SemiBold" Margin="0,12,0,4"/>
+                    <TextBlock Text="PIN actual" Style="{StaticResource Dim}"/>
+                    <PasswordBox x:Name="CurrentPinBox" MaxLength="64" Margin="0,2,0,4" AutomationProperties.Name="PIN actual"/>
+                    <TextBlock Text="PIN nuevo" Style="{StaticResource Dim}"/>
+                    <PasswordBox x:Name="NewPinBox" MaxLength="64" Margin="0,2,0,4" AutomationProperties.Name="PIN nuevo"/>
+                    <TextBlock Text="Repite el PIN nuevo" Style="{StaticResource Dim}"/>
+                    <PasswordBox x:Name="ConfirmPinBox" MaxLength="64" Margin="0,2,0,4" AutomationProperties.Name="Repetir PIN nuevo"/>
+                    <Button Content="Cambiar PIN" HorizontalAlignment="Left" Click="OnChangePin"/>
+                    <TextBlock Text="{Binding PinMessage}" FontSize="12" TextWrapping="Wrap" Margin="0,4,0,0"
+                               Visibility="{Binding HasPinMessage, Converter={StaticResource BoolToVis}}">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Foreground" Value="{StaticResource AccentHi}"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding PinError}" Value="True">
+                                        <Setter Property="Foreground" Value="{StaticResource Danger}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </StackPanel>
+            </Border>
+
+            <TextBlock Text="ESCRITORIO" Style="{StaticResource SectionTitle}"/>
+            <Border Style="{StaticResource Card}">
+                <StackPanel>
+                    <RadioButton GroupName="DesktopMode" IsChecked="{Binding DesktopWidgetMode}" Content="Widget de escritorio (recomendado)"/>
+                    <TextBlock Style="{StaticResource Dim}" TextWrapping="Wrap" Margin="20,0,0,4"
+                               Text="Queda sobre el fondo de pantalla, debajo de tus ventanas normales, y sigue visible al mostrar el escritorio (Win+D). Usa una técnica no documentada oficialmente por Microsoft; si falla, usa el modo ventana."/>
+                    <RadioButton GroupName="DesktopMode" IsChecked="{Binding CompactMode}" Content="Ventana compacta"/>
+                    <TextBlock Style="{StaticResource Dim}" TextWrapping="Wrap" Margin="20,0,0,4"
+                               Text="Ventana normal con botón en la barra de tareas. Sin integración con el escritorio: Win+D la minimiza."/>
+                    <TextBlock Text="{Binding DesktopStatus}" FontSize="12" Foreground="{StaticResource AccentHi}" TextWrapping="Wrap" Margin="0,4,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <TextBlock Text="NOTIFICACIONES" Style="{StaticResource SectionTitle}"/>
+            <Border Style="{StaticResource Card}">
+                <StackPanel>
+                    <CheckBox IsChecked="{Binding NotificationsEnabled}" Content="Avisar de mensajes y solicitudes nuevas"/>
+                    <CheckBox IsChecked="{Binding SoundEnabled}" Content="Reproducir sonido" Margin="20,3,0,3" IsEnabled="{Binding NotificationsEnabled}"/>
+                    <CheckBox IsChecked="{Binding ShowPreview}" Content="Mostrar el texto del mensaje en el aviso" Margin="20,3,0,3" IsEnabled="{Binding NotificationsEnabled}"/>
+                    <TextBlock Style="{StaticResource Dim}" TextWrapping="Wrap"
+                               Text="Los avisos nunca roban el foco ni abren conversaciones: solo marcan el icono de la bandeja y, si el widget está oculto, muestran un globo del sistema."/>
+                    <CheckBox IsChecked="{Binding StartWithWindows}" Content="Iniciar MiniChat con Windows" Margin="0,10,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <TextBlock Text="ACTUALIZACIONES" Style="{StaticResource SectionTitle}"/>
+            <Border Style="{StaticResource Card}">
+                <StackPanel>
+                    <TextBlock>
+                        <Run Text="Versión instalada: "/><Run Text="{Binding Updates.CurrentVersion, Mode=OneWay}" FontWeight="SemiBold"/>
+                    </TextBlock>
+                    <TextBlock Style="{StaticResource Dim}" TextWrapping="Wrap" Margin="0,4,0,0"
+                               Visibility="{Binding Updates.NotConfigured, Converter={StaticResource BoolToVis}}"
+                               Text="Las actualizaciones no están configuradas en esta compilación. Ejecute una vez «pwsh tools\firmar-release.ps1 -Init», pegue la clave pública en UpdateConfig y defina el repositorio."/>
+
+                    <StackPanel Visibility="{Binding Updates.Configured, Converter={StaticResource BoolToVis}}">
+                        <TextBlock Style="{StaticResource Dim}" TextWrapping="Wrap" Margin="0,4,0,0"
+                                   Text="MiniChat funciona sin Internet; esto solo descarga la app si hay red y usted lo pide. La descarga se verifica por firma y huella antes de instalarse."/>
+
+                        <TextBlock Text="Canal" FontWeight="SemiBold" Margin="0,10,0,2"/>
+                        <RadioButton GroupName="UpdateChannel" IsChecked="{Binding Updates.ChannelStable}" Content="Estable (recomendado)"/>
+                        <RadioButton GroupName="UpdateChannel" IsChecked="{Binding Updates.ChannelExperimental}" Content="Experimental (versiones de prueba)"/>
+
+                        <CheckBox IsChecked="{Binding Updates.AutoCheck}" Content="Avisar al arrancar si hay una versión nueva" Margin="0,8,0,0"/>
+
+                        <WrapPanel Margin="0,8,0,0">
+                            <Button Content="Buscar actualizaciones" Margin="0,0,6,0" Command="{Binding Updates.CheckCommand}"/>
+                            <Button Content="{Binding Updates.InstallButtonText}" Style="{StaticResource PrimaryButton}"
+                                    Command="{Binding Updates.InstallCommand}"
+                                    Visibility="{Binding Updates.UpdateAvailable, Converter={StaticResource BoolToVis}}"/>
+                        </WrapPanel>
+
+                        <ProgressBar Value="{Binding Updates.Progress, Mode=OneWay}" Maximum="1" Height="4" Margin="0,8,0,0" BorderThickness="0"
+                                     Background="{StaticResource SurfaceHi}" Foreground="{StaticResource AccentHi}"
+                                     Visibility="{Binding Updates.Downloading, Converter={StaticResource BoolToVis}}"/>
+                        <TextBlock Text="{Binding Updates.Status}" FontSize="12" TextWrapping="Wrap" Margin="0,6,0,0"
+                                   Visibility="{Binding Updates.HasStatus, Converter={StaticResource BoolToVis}}">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Foreground" Value="{StaticResource AccentHi}"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Updates.StatusError}" Value="True">
+                                            <Setter Property="Foreground" Value="{StaticResource Danger}"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                        <Border Background="{StaticResource SurfaceHi}" CornerRadius="5" Padding="8,6" Margin="0,8,0,0"
+                                Visibility="{Binding Updates.HasNotes, Converter={StaticResource BoolToVis}}">
+                            <StackPanel>
+                                <TextBlock Text="Novedades" Style="{StaticResource Dim}"/>
+                                <TextBox Style="{StaticResource SelectableText}" Text="{Binding Updates.AvailableNotes, Mode=OneWay}" TextWrapping="Wrap" FontSize="12"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <TextBlock Text="DATOS" Style="{StaticResource SectionTitle}"/>
+            <Border Style="{StaticResource Card}">
+                <StackPanel>
+                    <TextBlock Text="Carpeta de datos de este usuario" Style="{StaticResource Dim}"/>
+                    <TextBox Style="{StaticResource SelectableText}" Text="{Binding DataFolder, Mode=OneWay}" FontSize="12"/>
+                    <WrapPanel Margin="0,6,0,0">
+                        <Button Content="Abrir carpeta" Margin="0,0,6,6" Command="{Binding OpenDataFolderCommand}"/>
+                        <Button Content="Registro de diagnóstico" Margin="0,0,6,6" Command="{Binding OpenLogsCommand}"/>
+                        <Button Content="Liberar imágenes sin uso" Margin="0,0,6,6" Command="{Binding CleanStickersCommand}"/>
+                    </WrapPanel>
+                    <TextBlock Text="{Binding DataMessage}" Style="{StaticResource Dim}" TextWrapping="Wrap"
+                               Visibility="{Binding HasDataMessage, Converter={StaticResource BoolToVis}}"/>
+                    <TextBlock Style="{StaticResource Dim}" TextWrapping="Wrap" Margin="0,6,0,0">
+                        <Run FontWeight="SemiBold" Text="Cifrado:"/>
+                        <Run Text="la comunicación entre equipos va cifrada con TLS y el historial guardado en este equipo está cifrado con su PIN y su cuenta de Windows (ver Seguridad). La carpeta solo es accesible para su usuario. Las exportaciones a texto NO se cifran."/>
+                    </TextBlock>
+                    <TextBlock Style="{StaticResource Dim}" TextWrapping="Wrap" Margin="0,6,0,0"
+                               Text="Para exportar o borrar el historial de una persona, usa el menú ⋯ de su conversación. Borrar solo afecta a este equipo."/>
+                    <TextBlock Style="{StaticResource Dim}" TextWrapping="Wrap" Margin="0,6,0,0"
+                               Text="El registro de diagnóstico no contiene textos de mensajes ni claves. Se limita a 5 archivos de 1 MB."/>
+                </StackPanel>
+            </Border>
+
+            <TextBlock Text="{Binding Version}" Style="{StaticResource Dim}" Margin="2,10,0,0"/>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

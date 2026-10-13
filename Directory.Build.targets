@@ -1,0 +1,13 @@
+<Project>
+  <!-- libSkiaSharp.pdb (≈92 MB) son símbolos nativos de depuración: no se copian ni se distribuyen. -->
+  <Target Name="MiniChatRemoveNativePdbFromBuild" AfterTargets="Build" Condition="'$(MSBuildProjectExtension)' == '.csproj'">
+    <Delete Files="$(OutDir)libSkiaSharp.pdb" ContinueOnError="true" />
+  </Target>
+  <Target Name="MiniChatRemoveNativePdbFromPublish" AfterTargets="ComputeResolvedFilesToPublishList" Condition="'$(MSBuildProjectExtension)' == '.csproj'">
+    <ItemGroup>
+      <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)" Condition="'%(Filename)%(Extension)' == 'libSkiaSharp.pdb'" />
+      <!-- Sin símbolos de proyectos referenciados (p. ej. MiniChat.Core.pdb) cuando se pide publicar sin símbolos. -->
+      <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)" Condition="'$(CopyOutputSymbolsToPublishDirectory)' == 'false' and '%(Extension)' == '.pdb'" />
+    </ItemGroup>
+  </Target>
+</Project>
